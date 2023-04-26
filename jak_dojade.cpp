@@ -27,8 +27,9 @@ void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width,
 	bool nextElseQuit = false;
 	bool quit = false;
 	int i = 0;
-	int firstIteration = 0;
-	// check to the right
+	// it will check all positions around x y in search for city name
+
+	// check right
 	while (isInMap(x + i + 1, y, height, width) && !quit)
 	{
 		if (map[y][x + i + 1] != EMPTY && map[y][x + i + 1] != ROAD && map[y][x + i + 1] != CITY)
@@ -42,7 +43,14 @@ void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width,
 		}
 	}
 	quit = false;
-	// check to the left
+
+	// check bottom right
+	
+	// check bottom
+	 
+	// check bottom left
+
+	// check left
 	while (isInMap(x + i - 1, y, height, width) && !quit)
 	{
 		if (map[y][x + i - 1] != EMPTY && map[y][x + i - 1] != ROAD && map[y][x + i - 1] != CITY)
@@ -65,15 +73,25 @@ void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width,
 			if(nextElseQuit) quit = true;
 		}
 	}
+
+	// check top left
+	
+	// check top
+	 
+	// check top right
+
+	// add city to an array
 	cities[cityIndex] = { x, y, cityName };
-	cout << cities[cityIndex].name;
+	//cout << cities[cityIndex].name;
 	cityIndex++;
 }
 
 int main()
 {
-	int x, y, w, h, k, q, numOfCities = 0;
+	int x, y, w, h, k, q;
+	int numOfCities = 0;
 	int cityIndex = 0;
+
 	cin >> w >> h;
 	char** map = new char*[h];
 	for (y = 0; y < h; y++)
@@ -89,7 +107,7 @@ int main()
 		}
 	}
 
-	cout << endl << numOfCities << endl;
+	//cout << endl << numOfCities << endl;
 
 	City* cities = new City[numOfCities];
 	
