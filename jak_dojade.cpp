@@ -20,65 +20,55 @@ bool isInMap(int x, int y, int height, int width)
 	return false;
 }
 
-void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width, char** map)
+void checkPositionAndAddName(int x, int y, int height, int width, char** map, string& cityName) 
 {
-	string cityName;
 	bool startAddingLetters = false;
 	bool nextElseQuit = false;
-	bool quit = false;
-	int i = 0;
-	// it will check all positions around x y in search for city name
-
-	// check right
-	while (isInMap(x + i + 1, y, height, width) && !quit)
+	while (isInMap(x, y, height, width))
 	{
-		if (map[y][x + i + 1] != EMPTY && map[y][x + i + 1] != ROAD && map[y][x + i + 1] != CITY)
-		{
-			cityName += map[y][x + i + 1];
-			i++;
-		}
-		else
-		{
-			quit = true;
-		}
-	}
-	quit = false;
-
-	// check bottom right
-	
-	// check bottom
-	 
-	// check bottom left
-
-	// check left
-	while (isInMap(x + i - 1, y, height, width) && !quit)
-	{
-		if (map[y][x + i - 1] != EMPTY && map[y][x + i - 1] != ROAD && map[y][x + i - 1] != CITY)
+		if (map[y][x] != EMPTY && map[y][x] != ROAD && map[y][x] != CITY)
 		{
 			if (!startAddingLetters)
 			{
-				i--;
+				if (x > 0)
+				{
+					x--;
+				}
+				else
+				{
+					startAddingLetters = true;
+				}
 			}
 			else
 			{
-				cityName += map[y][x + i - 1];
+				cityName += map[y][x];
+				map[y][x] = EMPTY;
 				nextElseQuit = true;
-				i++;
+				x++;
 			}
 		}
 		else
 		{
 			startAddingLetters = true;
-			i++;
-			if(nextElseQuit) quit = true;
+			x++;
+			if (nextElseQuit) return;
 		}
 	}
+}
 
-	// check top left
-	
-	// check top
-	 
-	// check top right
+void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width, char** map)
+{
+	string cityName;
+
+	// it will check all positions around x y in search for city name and add it to variable
+	checkPositionAndAddName(x + 1, y, height, width, map, cityName); // right
+	checkPositionAndAddName(x + 1, y + 1, height, width, map, cityName); // bottom right
+	checkPositionAndAddName(x, y + 1, height, width, map, cityName); // bottom
+	checkPositionAndAddName(x - 1, y + 1, height, width, map, cityName); // bottom left
+	checkPositionAndAddName(x - 1, y, height, width, map, cityName); // left
+	checkPositionAndAddName(x - 1, y - 1, height, width, map, cityName); // top left
+	checkPositionAndAddName(x, y - 1, height, width, map, cityName); // top
+	checkPositionAndAddName(x + 1, y - 1, height, width, map, cityName); // top right
 
 	// add city to an array
 	cities[cityIndex] = { x, y, cityName };
