@@ -1,15 +1,42 @@
 #include <iostream>
 #include <string>
+#include <list>
+#include <vector>
 using namespace std;
 #define EMPTY '.'
 #define ROAD '#'
 #define CITY '*'
+
+struct Pair
+{
+	int vertex, edge;
+};
+
+class Graph {
+public:
+	vector<list<Pair>> adj;
+	Graph(int size) :adj(size) { }
+	void addEdge(int id, Pair pair) {
+		adj[id].push_back(pair);
+	}
+	void print()
+	{
+		for (int i = 0; i < adj.size(); i++)
+		{
+			for (auto v : adj[i])
+				cout << i << " " << v.vertex << " " << v.edge << "\n";
+		}
+	}
+
+
+};
 
 
 struct City
 {
 	int x, y;
 	string name;
+	int id;
 };
 
 struct Flight
@@ -84,16 +111,154 @@ bool checkPositionAndAddName(int x, int y, int height, int width, char** map, st
 	}
 }
 
-void bfs(City city, char **map)
+struct Point
 {
-	return;
+	int x, y;
+};
+
+struct QNode {
+	Point data;
+	QNode* next;
+	QNode(Point p)
+	{
+		data = p;
+		next = NULL;
+	}
+};
+
+struct Queue {
+	QNode* front, * rear;
+	Queue() { front = rear = NULL; }
+
+
+	void enQueue(Point p)
+	{
+
+		QNode* temp = new QNode(p);
+
+		if (rear == NULL) {
+			front = rear = temp;
+			return;
+		}
+
+		rear->next = temp;
+		rear = temp;
+	}
+
+	void deQueue()
+	{
+		if (front == NULL)
+			return;
+
+		QNode* temp = front;
+		front = front->next;
+
+		if (front == NULL)
+			rear = NULL;
+
+		delete (temp);
+	}
+	bool empty()
+	{
+		if (front == NULL && rear == NULL) return true;
+		else return false;
+	}
+};
+
+
+void checkPos(int x, int y, char** map, int numOfCities, City* cities, Graph& g, int& distance, City city)
+{
+	if (map[y][x] == ROAD)
+	{
+		distance++;
+	}
+	else if (map[y][x] == CITY)
+	{
+		Pair p;
+		p.edge = distance;
+		int i = 0;
+		while (i < numOfCities)
+		{
+			if (cities[i].x == x && cities[i].y == y)
+			{
+				p.vertex = i;
+				break;
+			}
+			i++;
+		}
+		g.addEdge(city.id, p);
+	}
 }
 
-void addToGraph(City*& cities, int numOfCities, char** map)
+void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* cities)
 {
-	for (int i = 0; i < numOfCities; i++)
+	int distance = 0;
+	int x, y;
+	bool** visited = new bool* [h];
+	for (y = 0; y < h; y++)
 	{
-		bfs(cities[0], map);
+		visited[y] = new bool[w];
+		for (x = 0; x < w; x++)
+		{
+			visited[y][x] = false;
+		}
+	}
+	Queue q;
+	Point s;
+	s.x = city.x;
+	s.y = city.y;
+	visited[s.y][s.x] = true;
+	q.enQueue(s);
+
+	while (!q.empty())
+	{
+		s = q.front->data;
+		cout << s.x << ", " << s.y << endl;
+		q.deQueue();
+		if (isInMap(s.x + 1, s.y, h, w) && !visited[s.y][s.x + 1] && map[s.y][s.x + 1] != EMPTY) {
+			s.x++;
+			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			visited[s.y][s.x] = true;
+			q.enQueue(s);
+		}
+		if (isInMap(s.x - 1, s.y, h, w) && !visited[s.y][s.x - 1] && map[s.y][s.x - 1] != EMPTY) {
+			s.x--;
+			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			visited[s.y][s.x] = true;
+			q.enQueue(s);
+		}
+		if (isInMap(s.x, s.y + 1, h, w) && !visited[s.y + 1][s.x] && map[s.y + 1][s.x] != EMPTY) {
+			s.y++;
+			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			visited[s.y][s.x] = true;
+			q.enQueue(s);
+		}
+		if (isInMap(s.x, s.y - 1, h, w) && !visited[s.y - 1][s.x] && map[s.y - 1][s.x] != EMPTY) {
+			s.y--;
+			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			visited[s.y][s.x] = true;
+			q.enQueue(s);
+		}
+	}
+
+}
+
+void makeGraph(Graph& g, City*& cities, int numOfCities, char** map, int h, int w )
+{
+	int y, x, i = 0;
+	for (y = 0; y < h; y++)
+	{
+		for (x = 0; x < w; x++)
+		{
+			if (map[y][x] == CITY)
+			{
+				if (i < numOfCities)
+				{
+					bfs(g, cities[i], map, h, w, numOfCities, cities);
+					i++;
+				}
+			}
+		}
 	}
 }
 
@@ -115,7 +280,7 @@ void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width,
 	if (gotName)
 	{
 		// add city to an array
-		cities[cityIndex] = { x, y, cityName };
+		cities[cityIndex] = { x, y, cityName, cityIndex };
 		//cout << cities[cityIndex].name;
 		cityIndex++;
 	}
@@ -129,11 +294,6 @@ int shortestTravelTimeBetweenCities(Query query)
 }
 
 void printIntermediateCities(Query query)
-{
-	return;
-}
-
-void fillAmocbc(int** amocbc, City* cities, char** map)
 {
 	return;
 }
@@ -190,17 +350,12 @@ int main()
 		}
 	}
 
-	int** amocbc = new int* [numOfCities]; // "amocbc" - adjacency matrix of connections between cities
-	for (y = 0; y < numOfCities; y++)
-	{
-		amocbc[y] = new int[numOfCities];
-		for (x = 0; x < numOfCities; x++)
-		{
-			amocbc[y][x] = 0;
-		}
-	}
+	Graph g(numOfCities);
 
-	//fillAmocbc();
+	// get graph 
+	makeGraph(g, cities, numOfCities, map, h, w);
+	g.print();
+
 
 	// print map
 	/*cout << endl;
@@ -214,11 +369,11 @@ int main()
 	}*/
 
 	// print cities
-	/*cout << endl;
+	cout << endl;
 	for (int i = 0; i < numOfCities; i++)
 	{
-		cout << "City " << i + 1 << " have cords (" << cities[i].x << ", " << cities[i].y << ") is: " << cities[i].name << endl;
-	}*/
+		cout << "City " << i << " have cords (" << cities[i].x << ", " << cities[i].y << ") is: " << cities[i].name << endl;
+	}
 
 	// output
 	//for (int i = 0; i < q; i++)
