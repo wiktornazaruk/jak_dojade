@@ -2,6 +2,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <queue>
 using namespace std;
 #define EMPTY '.'
 #define ROAD '#'
@@ -114,6 +115,7 @@ bool checkPositionAndAddName(int x, int y, int height, int width, char** map, st
 struct Point
 {
 	int x, y;
+	int dist;
 };
 
 struct QNode {
@@ -166,20 +168,20 @@ struct Queue {
 };
 
 
-void checkPos(int x, int y, char** map, int numOfCities, City* cities, Graph& g, int& distance, City city)
+void checkPos(Point& pos, char** map, int numOfCities, City* cities, Graph& g, City city)
 {
-	if (map[y][x] == ROAD)
+	if (map[pos.y][pos.x] == ROAD)
 	{
-		distance++;
+		pos.dist++;
 	}
-	else if (map[y][x] == CITY)
+	else if (map[pos.y][pos.x] == CITY)
 	{
 		Pair p;
-		p.edge = distance;
+		p.edge = pos.dist;
 		int i = 0;
 		while (i < numOfCities)
 		{
-			if (cities[i].x == x && cities[i].y == y)
+			if (cities[i].x == pos.x && cities[i].y == pos.y)
 			{
 				p.vertex = i;
 				break;
@@ -192,7 +194,6 @@ void checkPos(int x, int y, char** map, int numOfCities, City* cities, Graph& g,
 
 void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* cities)
 {
-	int distance = 0;
 	int x, y;
 	bool** visited = new bool* [h];
 	for (y = 0; y < h; y++)
@@ -203,41 +204,58 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			visited[y][x] = false;
 		}
 	}
-	Queue q;
+	//Queue q;
+	queue<Point> q;
 	Point s;
 	s.x = city.x;
 	s.y = city.y;
+	s.dist = 0;
 	visited[s.y][s.x] = true;
-	q.enQueue(s);
+	//q.enQueue(s);
+	q.push(s);
 
 	while (!q.empty())
 	{
-		s = q.front->data;
+		//s = q.front->data;
+		s = q.front();
 		cout << s.x << ", " << s.y << endl;
-		q.deQueue();
+		//q.deQueue();
+		q.pop();
 		if (isInMap(s.x + 1, s.y, h, w) && !visited[s.y][s.x + 1] && map[s.y][s.x + 1] != EMPTY) {
 			s.x++;
-			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
-			q.enQueue(s);
+			if (map[s.y][s.x] == CITY) return;
+			//q.enQueue(s);
+			q.push(s);
+			s.x--;
 		}
 		if (isInMap(s.x - 1, s.y, h, w) && !visited[s.y][s.x - 1] && map[s.y][s.x - 1] != EMPTY) {
 			s.x--;
-			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
-			q.enQueue(s);
+			if (map[s.y][s.x] == CITY) return;
+			//q.enQueue(s);
+			q.push(s);
+			s.x++;
 		}
 		if (isInMap(s.x, s.y + 1, h, w) && !visited[s.y + 1][s.x] && map[s.y + 1][s.x] != EMPTY) {
 			s.y++;
-			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
-			q.enQueue(s);
+			if (map[s.y][s.x] == CITY) return;
+			//q.enQueue(s);
+			q.push(s);
+			s.y--;
 		}
 		if (isInMap(s.x, s.y - 1, h, w) && !visited[s.y - 1][s.x] && map[s.y - 1][s.x] != EMPTY) {
 			s.y--;
-			checkPos(s.x, s.y, map, numOfCities, cities, g, distance, city);
+			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
-			q.enQueue(s);
+			if (map[s.y][s.x] == CITY) return;
+			//q.enQueue(s);
+			q.push(s);
+			s.y++;
 		}
 	}
 
@@ -298,6 +316,32 @@ void printIntermediateCities(Query query)
 	return;
 }
 
+void addFlightsToGraph(Flight* flights, int k, City* cities, int numOfCities, Graph& g)
+{
+	for (int i = 0; i < k; i++)
+	{
+		int id1 = -1, id2 = -1;
+		for (int j = 0; j < numOfCities; j++)
+		{
+			if (flights[i].src == cities[j].name)
+			{
+				id1 = j;
+			}
+			if (flights[i].dest == cities[j].name)
+			{
+				id2 = j;
+			}
+		}
+		if (id1 != -1 && id2 != -1)
+		{
+			Pair p;
+			p.vertex = id2;
+			p.edge = flights[i].time;
+			g.addEdge(id1, p);
+		}
+	}
+}
+
 int main()
 {
 	int x, y, w, h, k, q;
@@ -354,6 +398,7 @@ int main()
 
 	// get graph 
 	makeGraph(g, cities, numOfCities, map, h, w);
+	addFlightsToGraph(flights, k, cities, numOfCities, g);
 	g.print();
 
 
@@ -376,13 +421,13 @@ int main()
 	}
 
 	// output
-	//for (int i = 0; i < q; i++)
-	//{
-		//cout << shortestTravelTimeBetweenCities(queries[i]);
-		//if (queries[i].type == 1)
-		//{
-			//printIntermediateCities(queries[i]);
-		//}
-	//}
+	for (int i = 0; i < q; i++)
+	{
+		cout << shortestTravelTimeBetweenCities(queries[i]);
+		if (queries[i].type == 1)
+		{
+			printIntermediateCities(queries[i]);
+		}
+	}
 	
 }
