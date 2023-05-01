@@ -2,7 +2,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <queue>
 using namespace std;
 #define EMPTY '.'
 #define ROAD '#'
@@ -133,7 +132,12 @@ struct Queue {
 	Queue() { front = rear = NULL; }
 
 
-	void enQueue(Point p)
+	Point getFront()
+	{
+		return front->data;
+	}
+
+	void push(Point p)
 	{
 
 		QNode* temp = new QNode(p);
@@ -147,7 +151,7 @@ struct Queue {
 		rear = temp;
 	}
 
-	void deQueue()
+	void pop()
 	{
 		if (front == NULL)
 			return;
@@ -204,29 +208,24 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			visited[y][x] = false;
 		}
 	}
-	//Queue q;
-	queue<Point> q;
+	Queue q;
 	Point s;
 	s.x = city.x;
 	s.y = city.y;
 	s.dist = 0;
 	visited[s.y][s.x] = true;
-	//q.enQueue(s);
 	q.push(s);
 
 	while (!q.empty())
 	{
-		//s = q.front->data;
-		s = q.front();
+		s = q.getFront();
 		cout << s.x << ", " << s.y << endl;
-		//q.deQueue();
 		q.pop();
 		if (isInMap(s.x + 1, s.y, h, w) && !visited[s.y][s.x + 1] && map[s.y][s.x + 1] != EMPTY) {
 			s.x++;
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.x--;
 		}
@@ -235,7 +234,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.x++;
 		}
@@ -244,7 +242,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.y--;
 		}
@@ -253,7 +250,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.y++;
 		}
