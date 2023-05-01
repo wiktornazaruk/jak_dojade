@@ -9,7 +9,7 @@ using namespace std;
 
 struct Pair
 {
-	int dest_id, edge;
+	int id, edge;
 };
 
 class Graph {
@@ -24,7 +24,7 @@ public:
 		for (int i = 0; i < adj.size(); i++)
 		{
 			for (auto v : adj[i])
-				cout << i << " " << v.dest_id << " " << v.edge << "\n";
+				cout << i << " " << v.id << " " << v.edge << "\n";
 		}
 	}
 
@@ -181,7 +181,7 @@ void checkPos(Point& pos, char** map, int numOfCities, City* cities, Graph& g, C
 		{
 			if (cities[i].x == pos.x && cities[i].y == pos.y)
 			{
-				p.dest_id = i;
+				p.id = i;
 				break;
 			}
 			i++;
@@ -313,11 +313,16 @@ void addFlightsToGraph(Flight* flights, int k, City* cities, int numOfCities, Gr
 		if (id1 != -1 && id2 != -1)
 		{
 			Pair p;
-			p.dest_id = id2;
+			p.id = id2;
 			p.edge = flights[i].time;
 			g.addEdge(id1, p);
 		}
 	}
+}
+
+void dijkstra(Graph g, int src, int dest, int type)
+{
+
 }
 
 int main()
@@ -398,7 +403,20 @@ int main()
 	// output
 	for (int i = 0; i < q; i++)
 	{
-		// dijkstra
+		int src = -1, dest = -1;
+		for (int j = 0; j < numOfCities; j++)
+		{
+			if (cities[j].name == queries[i].src)
+			{
+				src = cities[j].id;
+			}
+			if (cities[j].name == queries[i].dest)
+			{
+				dest = cities[j].id;
+			}
+		}
+		if(src != -1 && dest != -1)
+			dijkstra(g, src, dest, queries[i].type);
 	}
 	
 }
