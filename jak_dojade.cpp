@@ -2,7 +2,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <queue>
 using namespace std;
 #define EMPTY '.'
 #define ROAD '#'
@@ -10,7 +9,7 @@ using namespace std;
 
 struct Pair
 {
-	int vertex, edge;
+	int dest_id, edge;
 };
 
 class Graph {
@@ -25,13 +24,12 @@ public:
 		for (int i = 0; i < adj.size(); i++)
 		{
 			for (auto v : adj[i])
-				cout << i << " " << v.vertex << " " << v.edge << "\n";
+				cout << i << " " << v.dest_id << " " << v.edge << "\n";
 		}
 	}
 
 
 };
-
 
 struct City
 {
@@ -133,7 +131,7 @@ struct Queue {
 	Queue() { front = rear = NULL; }
 
 
-	void enQueue(Point p)
+	void push(Point p)
 	{
 
 		QNode* temp = new QNode(p);
@@ -147,7 +145,7 @@ struct Queue {
 		rear = temp;
 	}
 
-	void deQueue()
+	void pop()
 	{
 		if (front == NULL)
 			return;
@@ -183,7 +181,7 @@ void checkPos(Point& pos, char** map, int numOfCities, City* cities, Graph& g, C
 		{
 			if (cities[i].x == pos.x && cities[i].y == pos.y)
 			{
-				p.vertex = i;
+				p.dest_id = i;
 				break;
 			}
 			i++;
@@ -204,29 +202,24 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			visited[y][x] = false;
 		}
 	}
-	//Queue q;
-	queue<Point> q;
+	Queue q;
 	Point s;
 	s.x = city.x;
 	s.y = city.y;
 	s.dist = 0;
 	visited[s.y][s.x] = true;
-	//q.enQueue(s);
 	q.push(s);
 
 	while (!q.empty())
 	{
-		//s = q.front->data;
-		s = q.front();
+		s = q.front->data;
 		cout << s.x << ", " << s.y << endl;
-		//q.deQueue();
 		q.pop();
 		if (isInMap(s.x + 1, s.y, h, w) && !visited[s.y][s.x + 1] && map[s.y][s.x + 1] != EMPTY) {
 			s.x++;
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.x--;
 		}
@@ -235,7 +228,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.x++;
 		}
@@ -244,7 +236,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.y--;
 		}
@@ -253,7 +244,6 @@ void bfs(Graph& g, City city, char **map, int h, int w, int numOfCities, City* c
 			checkPos(s, map, numOfCities, cities, g, city);
 			visited[s.y][s.x] = true;
 			if (map[s.y][s.x] == CITY) return;
-			//q.enQueue(s);
 			q.push(s);
 			s.y++;
 		}
@@ -304,18 +294,6 @@ void addCity(City*& cities, int& cityIndex, int x, int y, int height, int width,
 	}
 }
 
-
-int shortestTravelTimeBetweenCities(Query query)
-{
-	int result = 0;
-	return result;
-}
-
-void printIntermediateCities(Query query)
-{
-	return;
-}
-
 void addFlightsToGraph(Flight* flights, int k, City* cities, int numOfCities, Graph& g)
 {
 	for (int i = 0; i < k; i++)
@@ -335,7 +313,7 @@ void addFlightsToGraph(Flight* flights, int k, City* cities, int numOfCities, Gr
 		if (id1 != -1 && id2 != -1)
 		{
 			Pair p;
-			p.vertex = id2;
+			p.dest_id = id2;
 			p.edge = flights[i].time;
 			g.addEdge(id1, p);
 		}
@@ -395,12 +373,9 @@ int main()
 	}
 
 	Graph g(numOfCities);
-
-	// get graph 
 	makeGraph(g, cities, numOfCities, map, h, w);
 	addFlightsToGraph(flights, k, cities, numOfCities, g);
 	g.print();
-
 
 	// print map
 	/*cout << endl;
@@ -423,11 +398,7 @@ int main()
 	// output
 	for (int i = 0; i < q; i++)
 	{
-		cout << shortestTravelTimeBetweenCities(queries[i]);
-		if (queries[i].type == 1)
-		{
-			printIntermediateCities(queries[i]);
-		}
+		// dijkstra
 	}
 	
 }
