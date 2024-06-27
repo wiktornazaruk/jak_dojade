@@ -1,2 +1,2 @@
 # jak_dojade
-Program do znajdywania najkrótszej trasy miedzy miastami, algorytm BFS z wykorzystaniem macierzy sąsiedztwa. Więcej informacji w pliku instrukcja_jak_dojade.txt
+Program for finding the shortest route between cities using BFS algorithm with the adjacency matrix. More info in the file instrukcja_jak_dojade.txt.
